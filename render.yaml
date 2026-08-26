@@ -1,4 +1,4 @@
-# Render.com blueprint for the backend (free tier). Reliable FastAPI hosting.
+# Render.com blueprint (repo root). Deploys the FastAPI backend from ./backend.
 # In Render: New + → Blueprint → point at this repo → it reads this file.
 services:
   - type: web
