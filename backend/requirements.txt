@@ -1,0 +1,15 @@
+# --- SOPilot backend dependencies ---
+
+# Web framework + ASGI server
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# Request/response validation & typed models
+pydantic>=2.9.0
+pydantic-settings>=2.6.0
+
+# Google Gemini SDK (used only at compile time)
+google-genai>=0.3.0
+
+# Load GEMINI_API_KEY etc. from a .env file in local dev
+python-dotenv>=1.0.0

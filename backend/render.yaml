@@ -1,0 +1,17 @@
+# Render.com blueprint for the backend (free tier). Reliable FastAPI hosting.
+# In Render: New + → Blueprint → point at this repo → it reads this file.
+services:
+  - type: web
+    name: cascade-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # set this secret in the Render dashboard, not in git
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: CORS_ORIGINS
+        value: "*"
