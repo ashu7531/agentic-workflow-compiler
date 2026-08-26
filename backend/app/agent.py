@@ -19,7 +19,7 @@ from typing import Any
 from app.config import get_settings
 from app.tools import ACTION_LOG, TOOL_REGISTRY, set_case, tool_catalog_text
 
-MAX_STEPS = 8
+MAX_STEPS = 5
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,8 +99,10 @@ def _gemini_agent(case_text: str, entry: dict[str, Any], policy_text: str) -> di
         "OR, when the case is resolved:\n"
         '  {\"thought\": \"...\", \"action\": \"final\", \"final\": \"<summary of what you did>\"}\n'
         "Prefer to gather needed data with fetch tools first, then take exactly the "
-        "actions the policy requires. If you cannot proceed safely, take the escalate/"
-        "notify-a-human tool or finish with a final that says you are escalating."
+        "actions the policy requires.\n"
+        "IMPORTANT: If NONE of the available tools are relevant to this case, do NOT call "
+        "any tool — immediately reply with action:final escalating to a human. Do not loop "
+        "through unrelated tools. Keep the run short."
     )
 
     transcript: list[str] = [f"CASE: {case_text}"]

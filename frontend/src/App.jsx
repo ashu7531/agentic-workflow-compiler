@@ -25,6 +25,7 @@ export default function App() {
   const [runResult, setRunResult] = useState(null);
   const [entry, setEntry] = useState({}); // dynamic run inputs from graph.entry_fields
   const [busy, setBusy] = useState(false);
+  const [busyKind, setBusyKind] = useState(''); // 'compile' | 'run' | 'agent' | 'handle'
   const [error, setError] = useState('');
   const [samples, setSamples] = useState([]);
   const [libraryItems, setLibraryItems] = useState([]);
@@ -100,7 +101,7 @@ export default function App() {
   }
 
   async function handleCompile(useAnswers) {
-    setBusy(true); setError(''); setRunResult(null); setSelectedId(null);
+    setBusy(true); setBusyKind('compile'); setError(''); setRunResult(null); setSelectedId(null);
     try {
       const res = await api.compile(sopText, useAnswers ? answers : null);
       if (res.type === 'clarification') {
@@ -113,12 +114,12 @@ export default function App() {
         setAnswers({});
       }
     } catch (e) { setError(String(e)); }
-    setBusy(false);
+    setBusy(false); setBusyKind('');
   }
 
   async function handleRun() {
     if (!graph) return;
-    setBusy(true); setError(''); setAgentResult(null);
+    setBusy(true); setBusyKind(agentMode ? 'agent' : 'run'); setError(''); setAgentResult(null);
     try {
       if (agentMode) {
         // Force the tool-using agent, using the SOP text as its policy guidance.
@@ -129,7 +130,7 @@ export default function App() {
         setRunResult(await api.run(graph, entry, caseData));
       }
     } catch (e) { setError(String(e)); }
-    setBusy(false);
+    setBusy(false); setBusyKind('');
   }
 
   async function applyNodeEdit(nodeId, patch) {
@@ -161,7 +162,7 @@ export default function App() {
   }
 
   async function autoHandle() {
-    setBusy(true); setError(''); setRouteInfo(null); setAgentResult(null); setRunResult(null);
+    setBusy(true); setBusyKind('handle'); setError(''); setRouteInfo(null); setAgentResult(null); setRunResult(null);
     // Fill the id under all common entry-field names so whatever the matched
     // workflow expects is populated.
     const entryAll = {
@@ -180,7 +181,7 @@ export default function App() {
         setRunResult(null);
       }
     } catch (e) { setError(String(e)); }
-    setBusy(false);
+    setBusy(false); setBusyKind('');
   }
 
   async function deleteSaved(id) {
@@ -229,7 +230,7 @@ export default function App() {
             <textarea value={sopText} onChange={(e) => setSopText(e.target.value)} rows={7}
               placeholder="e.g. When a payment fails twice, pause the subscription and email the customer…" />
             <button className="primary" disabled={busy} onClick={() => handleCompile(false)}>
-              {busy ? 'Compiling…' : '⚙ Compile to workflow'}
+              {busyKind === 'compile' ? 'Compiling…' : '⚙ Compile to workflow'}
             </button>
           </section>
 
@@ -263,7 +264,9 @@ export default function App() {
             <textarea value={handleText} onChange={(e) => setHandleText(e.target.value)} rows={3} />
             <label style={{ marginTop: 8 }}>Case id</label>
             <input value={handleId} onChange={(e) => setHandleId(e.target.value)} />
-            <button className="primary" disabled={busy} onClick={autoHandle}>🧭 Route &amp; handle</button>
+            <button className="primary" disabled={busy} onClick={autoHandle}>
+              {busyKind === 'handle' ? 'Routing… (agent may take ~20s)' : '🧭 Route & handle'}
+            </button>
             {routeInfo && (
               <div className={`route-badge ${routeInfo.route}`}>
                 {routeInfo.route === 'workflow' ? '🧩 Routed to WORKFLOW' : '🤖 Routed to AGENT'}
@@ -330,7 +333,7 @@ export default function App() {
                 <span>🤖 Agent mode <small>(let an AI agent handle it with tools, instead of the fixed workflow)</small></span>
               </label>
               <button className={agentMode ? 'agent-btn' : 'run'} disabled={busy} onClick={handleRun}>
-                {agentMode ? '🤖 Run with agent' : 'Run workflow'}
+                {busyKind === 'agent' ? '🤖 Agent thinking…' : busyKind === 'run' ? 'Running…' : agentMode ? '🤖 Run with agent' : 'Run workflow'}
               </button>
 
               <label style={{ marginTop: 12 }}>Save this workflow as</label>
