@@ -74,12 +74,14 @@ def list_tools() -> dict[str, Any]:
 
 @app.post("/compile")
 def compile_endpoint(req: CompileRequest) -> dict[str, Any]:
-    result = compile_sop(req.sop_text, req.answers)
-    payload = result.to_dict()
-    # If we produced a graph, run validation and attach any problems.
-    if result.kind == "graph" and result.graph is not None:
-        payload["validation"] = validate_graph(result.graph)
-    return payload
+    try:
+        result = compile_sop(req.sop_text, req.answers)
+        payload = result.to_dict()
+        if result.kind == "graph" and result.graph is not None:
+            payload["validation"] = validate_graph(result.graph)
+        return payload
+    except Exception as e:  # noqa: BLE001 — surface the real error to the UI (with CORS)
+        return {"type": "error", "error": f"{type(e).__name__}: {e}"}
 
 
 @app.post("/validate")

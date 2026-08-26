@@ -12,6 +12,6 @@ services:
       - key: GEMINI_API_KEY
         sync: false          # set this secret in the Render dashboard, not in git
       - key: GEMINI_MODEL
-        value: gemini-2.5-flash
+        value: gemini-3.6-flash
       - key: CORS_ORIGINS
         value: "*"

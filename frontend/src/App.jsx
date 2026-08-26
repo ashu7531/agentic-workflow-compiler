@@ -34,6 +34,9 @@ export default function App() {
   const [saveMsg, setSaveMsg] = useState('');
   const [agentMode, setAgentMode] = useState(false);
   const [agentResult, setAgentResult] = useState(null);
+  const [handleText, setHandleText] = useState('An order is delayed and the customer is upset, please handle it.');
+  const [handleId, setHandleId] = useState('CASE-123');
+  const [routeInfo, setRouteInfo] = useState(null);
 
   useEffect(() => {
     api.health().catch(() => {});
@@ -157,6 +160,29 @@ export default function App() {
     setBusy(false);
   }
 
+  async function autoHandle() {
+    setBusy(true); setError(''); setRouteInfo(null); setAgentResult(null); setRunResult(null);
+    // Fill the id under all common entry-field names so whatever the matched
+    // workflow expects is populated.
+    const entryAll = {
+      wbn: handleId, content_id: handleId, alert_id: handleId,
+      subscription_id: handleId, order_id: handleId, user_id: handleId,
+    };
+    try {
+      const res = await api.handle(handleText, entryAll, caseData, false);
+      setRouteInfo({ route: res.route, reason: res.reason, title: res.matched_title });
+      if (res.route === 'workflow') {
+        setGraph(res.graph);
+        setRunResult(res.run);
+        setAgentResult(null);
+      } else {
+        setAgentResult(res.agent);
+        setRunResult(null);
+      }
+    } catch (e) { setError(String(e)); }
+    setBusy(false);
+  }
+
   async function deleteSaved(id) {
     try { await api.remove(id); refreshLibrary(); }
     catch (e) { setError(String(e)); }
@@ -224,6 +250,25 @@ export default function App() {
                   </li>
                 ))}
               </ul>
+            )}
+          </section>
+
+          <section className="card">
+            <h3>🧭 Auto-handle a case (router)</h3>
+            <p className="muted-note" style={{ marginTop: 0 }}>
+              Type an incoming case. The router searches your saved workflows — if one
+              matches it runs deterministically; if not, the agent handles it.
+            </p>
+            <label>Incoming case</label>
+            <textarea value={handleText} onChange={(e) => setHandleText(e.target.value)} rows={3} />
+            <label style={{ marginTop: 8 }}>Case id</label>
+            <input value={handleId} onChange={(e) => setHandleId(e.target.value)} />
+            <button className="primary" disabled={busy} onClick={autoHandle}>🧭 Route &amp; handle</button>
+            {routeInfo && (
+              <div className={`route-badge ${routeInfo.route}`}>
+                {routeInfo.route === 'workflow' ? '🧩 Routed to WORKFLOW' : '🤖 Routed to AGENT'}
+                <div className="route-reason">{routeInfo.reason}</div>
+              </div>
             )}
           </section>
 

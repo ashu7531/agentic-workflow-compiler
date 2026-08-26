@@ -127,6 +127,12 @@ button.agent-btn:hover:not(:disabled) { filter: brightness(1.08); }
 .agent-final { font-size: 12px; color: #065f46; font-weight: 600; }
 .agent-answer { margin-top: 8px; padding: 10px; background: #ecfdf5; border: 1px solid #a7f3d0;
   border-radius: 10px; font-size: 13px; font-weight: 600; color: #065f46; }
+
+/* ── Router badge ── */
+.route-badge { margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-weight: 700; font-size: 13px; }
+.route-badge.workflow { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+.route-badge.agent { background: #f5f3ff; border: 1px solid #ddd6fe; color: #5b21b6; }
+.route-reason { font-weight: 400; font-size: 11px; color: var(--muted); margin-top: 3px; }
 button.ghost { background: #fff; color: var(--brand-ink); border: 1px solid #c7d2fe; }
 button.ghost:hover:not(:disabled) { background: #eef2ff; }
 

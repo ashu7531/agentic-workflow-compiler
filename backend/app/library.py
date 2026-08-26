@@ -99,6 +99,11 @@ def list_saved() -> list[dict[str, Any]]:
     return [{"id": s["id"], "title": s["title"], "sop_text": s["sop_text"]} for s in _saved]
 
 
+def all_full() -> list[dict[str, Any]]:
+    """All saved workflows INCLUDING their graphs — used by the router to match."""
+    return list(_saved)
+
+
 def get_saved(item_id: str) -> dict[str, Any] | None:
     return next((s for s in _saved if s["id"] == item_id), None)
 
