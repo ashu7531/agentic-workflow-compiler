@@ -44,6 +44,15 @@ def _match_saved_workflow(case_text: str) -> dict[str, Any] | None:
     return None
 
 
+def _builtin_sop_for_domain(domain: str) -> str | None:
+    """The built-in example SOP text for a recognized domain (a full procedure,
+    which compiles into a proper workflow — unlike a short case description)."""
+    for s in library.SAMPLE_SOPS:
+        if detect_domain(s.get("sop_text", "")) == domain:
+            return s["sop_text"]
+    return None
+
+
 def handle_case(case_text: str, entry: dict[str, Any] | None = None,
                 case: dict[str, Any] | None = None, force_agent: bool = False) -> dict[str, Any]:
     entry = entry or {}
@@ -61,14 +70,18 @@ def handle_case(case_text: str, entry: dict[str, Any] | None = None,
                 "reason": f"matched saved workflow “{saved['title']}”",
                 "matched_title": saved["title"], "graph": saved["graph"], "run": run}
 
-    # 2. No saved match — can we compile a built-in workflow for this domain?
-    result = compile_sop(case_text)
-    if result.kind == "graph" and result.graph is not None and not validate_graph(result.graph):
-        graph_dict = result.graph.model_dump(by_alias=True)
-        run = _run_graph_dict(graph_dict, entry, case)
-        return {"route": "workflow",
-                "reason": "no saved workflow — compiled a built-in one for this domain",
-                "matched_title": result.graph.sop_title, "graph": graph_dict, "run": run}
+    # 2. No saved match — if we recognize the domain, build a workflow from that
+    #    domain's built-in SOP (a full procedure, not the short case text).
+    domain = detect_domain(case_text)
+    sop_text = _builtin_sop_for_domain(domain) if domain else None
+    if sop_text:
+        result = compile_sop(sop_text)
+        if result.kind == "graph" and result.graph is not None and not validate_graph(result.graph):
+            graph_dict = result.graph.model_dump(by_alias=True)
+            run = _run_graph_dict(graph_dict, entry, case)
+            return {"route": "workflow",
+                    "reason": f"no saved workflow — built a {domain} workflow from the built-in SOP",
+                    "matched_title": result.graph.sop_title, "graph": graph_dict, "run": run}
 
     # 3. Nothing matched — the agent handles it.
     agent = run_agent(case_text, entry, case, policy_text=case_text)
