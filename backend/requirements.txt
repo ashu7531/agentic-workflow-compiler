@@ -13,3 +13,6 @@ google-genai>=0.3.0
 
 # Load GEMINI_API_KEY etc. from a .env file in local dev
 python-dotenv>=1.0.0
+
+# Sentry for Error Tracking
+sentry-sdk[fastapi]>=2.0.0

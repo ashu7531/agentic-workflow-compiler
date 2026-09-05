@@ -23,6 +23,14 @@ from app.runtime import run_graph
 from app.tools import ACTION_LOG, CASE_DEFAULTS, TOOL_REGISTRY, set_case
 from app.validator import validate_graph
 
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://ace46ad7de024b6675f4e1519de8b2e6@o4512033522450432.ingest.us.sentry.io/4512033564852224",
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
+
 settings = get_settings()
 app = FastAPI(title="SOPilot", version="0.1.0")
 
@@ -61,6 +69,10 @@ class SaveRequest(BaseModel):
 def health() -> dict[str, Any]:
     return {"status": "ok", "llm_configured": settings.has_llm,
             "mode": "gemini" if settings.has_llm else "mock"}
+
+@app.get("/sentry-debug")
+def trigger_error():
+    division_by_zero = 1 / 0
 
 
 @app.get("/tools")
