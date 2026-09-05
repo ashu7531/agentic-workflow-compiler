@@ -26,7 +26,7 @@ from app.validator import validate_graph
 import sentry_sdk
 
 sentry_sdk.init(
-    dsn="https://ace46ad7de024b6675f4e1519de8b2e6@o4512033522450432.ingest.us.sentry.io/4512033564852224",
+    dsn="https://20951920dd04c7f65152f39f3667f81b@o4512033522450432.ingest.us.sentry.io/4512033616429056",
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
 )
